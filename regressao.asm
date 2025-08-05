@@ -63,7 +63,7 @@ linear_coef:
     movss xmm1, [rsp] ;xmm1 = Sx | S == desvio padrão
     add rsp, 16         
     divss xmm0, xmm1;xmm0 = Sxy / Sx
-    movss [b], dword xmm0
+    movss [b], xmm0
 
 angular_coef:
     lea rdi, [x]    ;ponteiro pro vetor dos pontos x
@@ -259,5 +259,6 @@ fim_sxy:
     mov rsp, rbp
     pop rbp
     ret
+
 
 
