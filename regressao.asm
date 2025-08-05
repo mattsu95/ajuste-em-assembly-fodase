@@ -4,95 +4,89 @@ section .data
     x: dd 1.0, 2.0, 3.0, 4.0, 5.0
     y: dd 2.0, 4.1, 6.0, 8.1, 10.2
     n: dd 5
-
     strc: db "a = %f, b = %f", 10, 0
 
 section .bss
-    a: resd 1   ;coeficiente angular
-    b: resd 1   ;coeficiente linear
+    a: resd 1
+    b: resd 1
 
 section .text
+    extern printf
     global main
 
 main:
-    ;stack-frame
     push rbp
     mov rbp, rsp
 
-linear_coef:
-    lea rdi, [x]    ;ponteiro pro vetor dos pontos x
-    mov rsi, [n]    ;número de pontos
-    call Som_x      ;somatório de x
+    lea rdi, [x]
+    mov esi, [n]            ; ← CORRETO
+    call Som_x
     sub rsp, 16
-    movss [rsp], xmm0 ;guarda o somatório de x na pilha pra usar dps
+    movss [rsp], xmm0
 
     lea rdi, [x]
-    mov rsi, [n]
-    call Som_xq     ;somatório de x^2
-    ;aqui, xmm0 = somatório(x^2)
-
-    movss xmm1, [rsp] ;xmm1 = somatório(x)
-    add rsp, 16        
-    mov rdi, [n]
-    call Dpx          ;desvio padrao de x
+    mov esi, [n]
+    call Som_xq
+    movss xmm1, [rsp]
+    add rsp, 16
+    mov edi, [n]
+    call Dpx
     sub rsp, 16
-    movss [rsp], xmm0 ;guarda o desvio padrão de x
+    movss [rsp], xmm0
 
-    lea rdi, [y]    ;ponteiro pro vetor dos pontos y
-    mov rsi, [n]
-    call Som_y      ;somatório de y
+    lea rdi, [y]
+    mov esi, [n]
+    call Som_y
     sub rsp, 16
-    movss [rsp], xmm0 ;guarda somatório de y
+    movss [rsp], xmm0
 
     lea rdi, [x]
     lea rsi, [y]
-    mov rdx, [n]
-    call Som_xy     ;somatório de x*y
+    mov edx, [n]
+    call Som_xy
     sub rsp, 16
-    movss [rsp], xmm0 ;guarda
+    movss [rsp], xmm0
 
     lea rdi, [x]
-    mov rsi, [n]
-    call Som_x      ;calcula o somatório de x dnv pq não tive vontade o bastante de pensar em uma forma de guardar o q eu fiz antes
-    ;aqui, xmm0 = somatório(x)
+    mov esi, [n]
+    call Som_x
 
-    movss xmm1, [rsp] ;xmm1 = somatório(x*y)
-    add rsp, 16        
-    movss xmm2, [rsp] ;xmm2 = somatório(y)
-    add rsp, 16         
-    call Dpy        ;desvio padrão de y
+    movss xmm1, [rsp]
+    add rsp, 16
+    movss xmm2, [rsp]
+    add rsp, 16
+    mov edi, [n]
+    call Dpy
 
-    movss xmm1, [rsp] ;xmm1 = Sx | S == desvio padrão
-    add rsp, 16         
-    divss xmm0, xmm1;xmm0 = Sxy / Sx
+    movss xmm1, [rsp]
+    add rsp, 16
+    divss xmm0, xmm1
     movss [b], xmm0
 
-angular_coef:
-    lea rdi, [x]    ;ponteiro pro vetor dos pontos x
-    mov rsi, [n]    ;número de pontos
-    call Som_x      ;somatório de x
+    lea rdi, [x]
+    mov esi, [n]
+    call Som_x
     sub rsp, 16
-    movss [rsp], xmm0 ;guarda o somatório de x na pilha pra usar dps
+    movss [rsp], xmm0
 
-    lea rdi, [y]    ;ponteiro pro vetor dos pontos y
-    mov rsi, [n]
-    call Som_y      ;somatório de y
-    
-    ;xmm0 = somatório(y)
-    movss xmm1, [rsp] ;xmm1 = somatorio(x)
-    add rsp, 16        
+    lea rdi, [y]
+    mov esi, [n]
+    call Som_y
+
+    movss xmm1, [rsp]
+    add rsp, 16
     movss xmm2, dword [b]
-    mov rdi, [n]
+    mov edi, [n]
     call alfa
+    movss [a], xmm0
 
-
-    cvtss2sd xmm0, xmm0
-    movss xmm1, [b]
-    cvtss2sd xmm1, xmm1
-
-    mov rax, 2
-    lea rdi, [strc]
+    ; Impressão
+    cvtss2sd xmm0, [a]
+    cvtss2sd xmm1, [b]
+    mov rdi, strc
+    mov eax, 2
     call printf
+
 
 fim:
     ;destack-frame
@@ -110,18 +104,15 @@ alfa:
     push rbp
     mov rbp, rsp
 
-    cvtsi2ss xmm3, rdi
-    divss xmm0, xmm3    ;xmm0 = média de y
-
-    divss xmm1, xmm3    ;xmm0 = média de x
-
-    mulss xmm1, xmm2    ;xmm1 = b * (média de x)
-
+    cvtsi2ss xmm3, edi
+    divss xmm0, xmm3      ; média y
+    divss xmm1, xmm3      ; média x
+    mulss xmm1, xmm2
     subss xmm0, xmm1
 
-    ret
     mov rsp, rbp
     pop rbp
+    ret
 
 ;======================================================Dpx======================================================
 
