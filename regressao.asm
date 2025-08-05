@@ -21,7 +21,7 @@ linear_coef:
     lea rdi, [x]    ;ponteiro pro vetor dos pontos x
     mov rsi, [n]    ;número de pontos
     call Som_x      ;somatório de x
-    push xmm0       ;guarda o somatório de x na pilha pra usar dps
+    push dword xmm0       ;guarda o somatório de x na pilha pra usar dps
 
     lea rdi, [x]
     mov rsi, [n]
@@ -249,3 +249,4 @@ fim_sxy:
     mov rsp, rbp
     pop rbp
     ret
+
