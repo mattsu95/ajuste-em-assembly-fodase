@@ -108,7 +108,7 @@ alfa:
 
     subss xmm0, xmm1
 
-    ret xmm0
+    ret
     mov rsp, rbp
     pop rbp
 
@@ -259,6 +259,7 @@ fim_sxy:
     mov rsp, rbp
     pop rbp
     ret
+
 
 
 
