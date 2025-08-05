@@ -29,32 +29,39 @@ linear_coef:
     call Som_xq     ;somatório de x^2
     ;aqui, xmm0 = somatório(x^2)
 
-    pop xmm1        ;xmm1 = somatório(x)
+    movss xmm1, [rsp] ;xmm1 = somatório(x)
+    add rsp, 16        
     mov rdi, [n]
-    call Dpx        ;desvio padrao de x
-    push xmm0       ;guarda o desvio padrão de x
+    call Dpx          ;desvio padrao de x
+    sub rsp, 16
+    movss [rsp], xmm0 ;guarda o desvio padrão de x
 
     lea rdi, [y]    ;ponteiro pro vetor dos pontos y
     mov rsi, [n]
     call Som_y      ;somatório de y
-    push xmm0       ;guarda somatório de y
+    sub rsp, 16
+    movss [rsp], xmm0 ;guarda somatório de y
 
     lea rdi, [x]
     lea rsi, [y]
     mov rdx, [n]
     call Som_xy     ;somatório de x*y
-    push xmm0       ;guarda
+    sub rsp, 16
+    movss [rsp], xmm0 ;guarda
 
     lea rdi, [x]
     mov rsi, [n]
     call Som_x      ;calcula o somatório de x dnv pq não tive vontade o bastante de pensar em uma forma de guardar o q eu fiz antes
     ;aqui, xmm0 = somatório(x)
 
-    pop xmm1        ;xmm1 = somatório(x*y)
-    pop xmm2        ;xmm2 = somatório(y)
+    movss xmm1, [rsp] ;xmm1 = somatório(x*y)
+    add rsp, 16        
+    movss xmm2, [rsp] ;xmm2 = somatório(y)
+    add rsp, 16         
     call Dpy        ;desvio padrão de y
 
-    pop xmm1        ;xmm1 = Sx | S == desvio padrão
+    movss xmm1, [rsp] ;xmm1 = Sx | S == desvio padrão
+    add rsp, 16         
     divss xmm0, xmm1;xmm0 = Sxy / Sx
     movss [b], dword xmm0
 
@@ -62,14 +69,16 @@ angular_coef:
     lea rdi, [x]    ;ponteiro pro vetor dos pontos x
     mov rsi, [n]    ;número de pontos
     call Som_x      ;somatório de x
-    push xmm0       ;guarda o somatório de x na pilha pra usar dps
+    sub rsp, 16
+    movss [rsp], xmm0 ;guarda o somatório de x na pilha pra usar dps
 
     lea rdi, [y]    ;ponteiro pro vetor dos pontos y
     mov rsi, [n]
     call Som_y      ;somatório de y
     
     ;xmm0 = somatório(y)
-    pop xmm1        ;xmm1 = somatorio(x)
+    movss xmm1, [rsp] ;xmm1 = somatorio(x)
+    add rsp, 16        
     movss xmm2, dword [b]
     mov rdi, [n]
     call alfa
@@ -250,6 +259,5 @@ fim_sxy:
     mov rsp, rbp
     pop rbp
     ret
-
 
 
