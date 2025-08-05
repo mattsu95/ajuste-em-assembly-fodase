@@ -5,6 +5,8 @@ section .data
     y: dd 2.0, 4.1, 6.0, 8.1, 10.2
     n: dd 5
 
+    strc: db "a = %f, b = %f", 10, 0
+
 section .bss
     a: resd 1   ;coeficiente angular
     b: resd 1   ;coeficiente linear
@@ -83,6 +85,15 @@ angular_coef:
     mov rdi, [n]
     call alfa
 
+
+    cvtss2sd xmm0, xmm0
+    movss xmm1, [b]
+    cvtss2sd xmm1, xmm1
+
+    mov rax, 2
+    lea rdi, [strc]
+    call printf
+
 fim:
     ;destack-frame
     mov rsp, rbp
@@ -108,9 +119,9 @@ alfa:
 
     subss xmm0, xmm1
 
+    ret
     mov rsp, rbp
     pop rbp
-    ret
 
 ;======================================================Dpx======================================================
 
@@ -259,8 +270,5 @@ fim_sxy:
     mov rsp, rbp
     pop rbp
     ret
-
-
-
 
 
