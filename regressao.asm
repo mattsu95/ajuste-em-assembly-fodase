@@ -75,14 +75,14 @@ main:
 
     movss xmm1, [rsp]
     add rsp, 16
-    movss xmm2, dword [b]
+    movss xmm2, dword [a]
     mov edi, [n]
     call alfa
     movss [b], xmm0
 
     ; Impressão
-    cvtss2sd xmm0, [a]
-    cvtss2sd xmm1, [b]
+    cvtss2sd xmm0, [b]
+    cvtss2sd xmm1, [a]
     mov rdi, strc
     mov eax, 2
     call printf
