@@ -78,7 +78,7 @@ main:
     movss xmm2, dword [a]
     mov edi, [n]
     call alfa
-    movss [a], xmm0
+    movss [b], xmm0
 
     ; Impressão
     cvtss2sd xmm0, [a]
@@ -261,5 +261,6 @@ fim_sxy:
     mov rsp, rbp
     pop rbp
     ret
+
 
 
