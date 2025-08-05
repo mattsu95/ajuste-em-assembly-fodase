@@ -17,6 +17,7 @@ main:
     push rbp
     mov rbp, rsp
 
+linear_coef:
     lea rdi, [x]    ;ponteiro pro vetor dos pontos x
     mov rsi, [n]    ;número de pontos
     call Som_x      ;somatório de x
@@ -56,6 +57,22 @@ main:
     divss xmm0, xmm1;xmm0 = Sxy / Sx
     movss [b], dword xmm0
 
+angular_coef:
+    lea rdi, [x]    ;ponteiro pro vetor dos pontos x
+    mov rsi, [n]    ;número de pontos
+    call Som_x      ;somatório de x
+    push xmm0       ;guarda o somatório de x na pilha pra usar dps
+
+    lea rdi, [y]    ;ponteiro pro vetor dos pontos y
+    mov rsi, [n]
+    call Som_y      ;somatório de y
+    
+    ;xmm0 = somatório(y)
+    pop xmm1        ;xmm1 = somatorio(x)
+    movss xmm2, dword [b]
+    mov rdi, [n]
+    call alfa
+
 fim:
     ;destack-frame
     mov rsp, rbp
@@ -64,6 +81,26 @@ fim:
     mov rax 60
     mov rdi 0;
 
+
+;======================================================alfa======================================================
+
+;float alfa(float sy, float b, float sx, int n)
+alfa:
+    push rbp
+    mov rbp, rsp
+
+    cvtsi2ss xmm3, rdi
+    divss xmm0, xmm3    ;xmm0 = média de y
+
+    divss xmm1, xmm3    ;xmm0 = média de x
+
+    mulss xmm1, xmm2    ;xmm1 = b * (média de x)
+
+    subss xmm0, xmm1
+
+    ret xmm0
+    mov rsp, rbp
+    pop rbp
 
 ;======================================================Dpx======================================================
 
