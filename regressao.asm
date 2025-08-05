@@ -61,7 +61,7 @@ main:
     movss xmm1, [rsp]
     add rsp, 16
     divss xmm0, xmm1
-    movss [b], xmm0
+    movss [a], xmm0
 
     lea rdi, [x]
     mov esi, [n]
@@ -78,7 +78,7 @@ main:
     movss xmm2, dword [b]
     mov edi, [n]
     call alfa
-    movss [a], xmm0
+    movss [b], xmm0
 
     ; Impressão
     cvtss2sd xmm0, [a]
