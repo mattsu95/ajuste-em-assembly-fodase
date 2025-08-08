@@ -1,9 +1,10 @@
 extern printf
 
 section .data
-    x: dd 1.0, 2.0, 3.0, 4.0, 5.0
-    y: dd 2.0, 4.1, 6.0, 8.1, 10.2
+    x: dd 1.5, 2.5, 3.5, 4.5, 5.5
+    y: dd 3.0, 5.5, 8.0, 10.5, 13.0
     n: dd 5
+    strc: db "a = %f, b = %f", 10, 0
 
 section .bss
     a: resd 1   ;coeficiente angular
@@ -18,52 +19,105 @@ main:
     mov rbp, rsp
 
     lea rdi, [x]    ;ponteiro pro vetor dos pontos x
-    mov rsi, [n]    ;número de pontos
+    mov esi, [n]    ;número de pontos
     call Som_x      ;somatório de x
-    push xmm0       ;guarda o somatório de x na pilha pra usar dps
+    sub rsp, 16     
+    movss [rsp], xmm0 ;guarda o somatório de x na pilha pra usar dps
 
     lea rdi, [x]
-    mov rsi, [n]
+    mov esi, [n]
     call Som_xq     ;somatório de x^2
     ;aqui, xmm0 = somatório(x^2)
 
-    pop xmm1        ;xmm1 = somatório(x)
-    mov rdi, [n]
-    call Dpx        ;desvio padrao de x
-    push xmm0       ;guarda o desvio padrão de x
+    movss xmm1, [rsp]   ;xmm1 = somatório(x)
+    add rsp, 16        
+    mov edi, [n]
+    call Dpx            ;desvio padrao de x
+    sub rsp, 16     
+    movss [rsp], xmm0   ;guarda o desvio padrão de x
 
-    lea rdi, [y]    ;ponteiro pro vetor dos pontos y
-    mov rsi, [n]
-    call Som_y      ;somatório de y
-    push xmm0       ;guarda somatório de y
+    lea rdi, [y]        ;ponteiro pro vetor dos pontos y
+    mov esi, [n]
+    call Som_y          ;somatório de y
+    sub rsp, 16     
+    movss [rsp], xmm0   ;guarda somatório de y
 
     lea rdi, [x]
     lea rsi, [y]
-    mov rdx, [n]
-    call Som_xy     ;somatório de x*y
-    push xmm0       ;guarda
+    mov edx, [n]
+    call Som_xy         ;somatório de x*y
+    sub rsp, 16     
+    movss [rsp], xmm0   ;guarda
 
     lea rdi, [x]
-    mov rsi, [n]
+    mov esi, [n]
     call Som_x      ;calcula o somatório de x dnv pq não tive vontade o bastante de pensar em uma forma de guardar o q eu fiz antes
     ;aqui, xmm0 = somatório(x)
 
-    pop xmm1        ;xmm1 = somatório(x*y)
-    pop xmm2        ;xmm2 = somatório(y)
-    call Dpy        ;desvio padrão de y
+    movss xmm1, [rsp]   ;xmm1 = somatório(x*y)
+    add rsp, 16        
+    movss xmm2, [rsp]   ;xmm2 = somatório(y)
+    add rsp, 16
+    mov edi, [n]
+    call Dpy            ;desvio padrão de y
 
-    pop xmm1        ;xmm1 = Sx | S == desvio padrão
-    divss xmm0, xmm1;xmm0 = Sxy / Sx
-    movss [b], dword xmm0
+    movss xmm1, [rsp]
+    add rsp, 16         ;xmm1 = Sx | S == desvio padrão
+    divss xmm0, xmm1    ;xmm0 = Sxy / Sx
+    movss [a], xmm0
+
+    lea rdi, [x]
+    mov esi, [n]
+    call Som_x
+    sub rsp, 16
+    movss [rsp], xmm0
+
+    lea rdi, [y]
+    mov esi, [n]
+    call Som_y
+    ;xmm0 = som_y
+
+    movss xmm1, [rsp]       ;xmm1 = som_x
+    add rsp, 16
+    movss xmm2, dword [a]   ;xmm2 = a
+    mov edi, [n]
+    call coef_linear
+    movss [b], xmm0
+
+    ;print debug:
+    cvtss2sd xmm0, [a]
+    cvtss2sd xmm1, [b]
+    mov rdi, strc
+    mov eax, 2
+    call printf
 
 fim:
     ;destack-frame
     mov rsp, rbp
     pop rbp
 
-    mov rax 60
-    mov rdi 0;
+    mov rax, 60
+    mov rdi, 0;
 
+
+;==================================================coef_linear==================================================
+
+;float coef_linear(float sy, float sx, float b, int n)
+coef_linear:
+    push rbp
+    mov rbp, rsp
+
+    cvtsi2ss xmm3, edi
+
+    divss xmm0, xmm3    ;média y
+    divss xmm1, xmm3    ;média x
+
+    mulss xmm1, xmm2    ;a*média de x     
+    subss xmm0, xmm1    ;média de y - o resultado do de cima
+
+    mov rsp, rbp
+    pop rbp
+    ret
 
 ;======================================================Dpx======================================================
 
@@ -170,7 +224,7 @@ Som_y:
     mov rdx, 0      ;índice do vetor
     xorps xmm0, xmm0
 
-laco_y:
+laco_sy:
     cmp rdx, rsi
     jge fim_sy
 
