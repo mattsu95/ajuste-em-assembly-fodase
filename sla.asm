@@ -23,8 +23,21 @@ section .text
 main:
     push rbp
     mov rbp, rsp
-    sub rsp, 32
 
+    call r_arquivo
+
+    mov rax, 60
+    mov rdi, 0
+    syscall
+
+r_arquivo:
+    push rbp
+    mov rbp, rsp
+
+    push r12
+    push r13
+
+    sub rsp, 32
     ;stack frame caga com a pilha ent tem que pegar o parâmetro pelo rdi
     cmp rdi, 2 
     jl erro
@@ -37,6 +50,8 @@ main:
 
     mov r12, rax        ;r12 = *file
     xor r13, r13        ;r13 = índice
+    
+    jmp laco_r
 
 laco_r:
     xor rax, rax
@@ -59,24 +74,23 @@ laco_r:
 
     inc r13
     cmp r13, 64
-    jge fim_r
-    jmp laco_r
+    jl laco_r
 
-erro:
-    xor rax, rax
-    lea rdi, [pstrctr]
-    call printf
-    jmp fim
 
 fim_r:
     mov rdi, r12
     call fclose
+    jmp fim
+
+erro:
+    lea rdi, [pstrctr]
+    xor rax, rax
+    call printf
 
 fim:
     add rsp, 32
+    pop r13
+    pop r12
     mov rsp, rbp
     pop rbp
-
-    mov rax, 60
-    mov rdi, 0
-    syscall
+    ret
