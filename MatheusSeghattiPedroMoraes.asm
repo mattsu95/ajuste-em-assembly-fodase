@@ -5,13 +5,11 @@ extern fprintf
 extern fscanf
 extern fopen
 extern fclose
-extern printf
 
 section .data
     rmode: db "r", 0
     amode: db "a", 0
     strctr: db "%f %f", 0
-    pstrctr: db "Erro na abertura do arquivo. Finalizando programa.", 10, 0
     stresult: db "a = %f, b = %f", 10, 0     
     fout: db "resultado.txt", 0
 
@@ -295,10 +293,7 @@ r_arquivo:
     push r13 ; salvar r13 (callee-saved)
 
     sub rsp, 32 ;alinhar
-    ;stack frame caga com a pilha ent tem que pegar o parâmetro pelo rdzi
-    ;cmp rdi, 2  
-    ;jl erro ; exige argc >= 2 (programa + 1 argumento)
-    ;achei que não valesse a pena ter um caso de erro - prefiro acreditar que o usuário será bem comportado e tudo mais
+    ;stack frame caga com a pilha ent tem que pegar o parâmetro pelo rsi
 
     mov rdx, [rsi + 8]  ;rdx = filename
     mov rdi, rdx        ;passa como parâmetro
@@ -353,8 +348,8 @@ presult:
     ; RDI já tem filename (passado pelo chamador)
     lea rsi, [amode]    ; rsi = "a"
     xor rax, rax
-    call fopen ; por convenção fopen retorna NULL se a abertura falhar
-    cmp rax, 0 ; teste do retorno NULL
+    call fopen
+    cmp rax, 0
     je err_open
 
     mov r12, rax            ;r12 = FILE*
@@ -387,4 +382,3 @@ err_open:
     mov rax, 1
     pop rbp
     ret
-
