@@ -353,8 +353,8 @@ presult:
     ; RDI já tem filename (passado pelo chamador)
     lea rsi, [amode]    ; rsi = "a"
     xor rax, rax
-    call fopen
-    cmp rax, 0
+    call fopen ; por convenção fopen retorna NULL se a abertura falhar
+    cmp rax, 0 ; teste do retorno NULL
     je err_open
 
     mov r12, rax            ;r12 = FILE*
@@ -387,3 +387,4 @@ err_open:
     mov rax, 1
     pop rbp
     ret
+
