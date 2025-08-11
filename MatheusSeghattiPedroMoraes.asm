@@ -12,7 +12,7 @@ section .data
     amode: db "a", 0
     strctr: db "%f %f", 0
     pstrctr: db "Erro na abertura do arquivo. Finalizando programa.", 10, 0
-    stresult: db "y = (%f)x + (%f)", 10, 0     ;(%f) só pra nao ter q criar duas strings de controle
+    stresult: db "a = %f, b = %f", 10, 0     
     fout: db "resultado.txt", 0
 
 section .bss
@@ -97,7 +97,7 @@ calc_regressao:
     add rsp, 16
     movss xmm2, dword [a]   ;xmm2 = a
     mov edi, [n]
-    call coef_linear        ;coef_linear(float sy, float sx, float b, int n)
+    call coef_linear        ;coef_linear(float sy, float sx, float a, int n)
     movss [b], xmm0
 
 printar_resultado:
@@ -120,7 +120,7 @@ fim:
 
 ;==================================================coef_linear==================================================
 
-;float coef_linear(float sy, float sx, float b, int n)
+;float coef_linear(float sy, float sx, float a, int n)
 coef_linear:
     push rbp
     mov rbp, rsp
@@ -295,7 +295,7 @@ r_arquivo:
     push r13 ; salvar r13 (callee-saved)
 
     sub rsp, 32 ;alinhar
-    ;stack frame caga com a pilha ent tem que pegar o parâmetro pelo rdi
+    ;stack frame caga com a pilha ent tem que pegar o parâmetro pelo rdzi
     ;cmp rdi, 2  
     ;jl erro ; exige argc >= 2 (programa + 1 argumento)
     ;achei que não valesse a pena ter um caso de erro - prefiro acreditar que o usuário será bem comportado e tudo mais
